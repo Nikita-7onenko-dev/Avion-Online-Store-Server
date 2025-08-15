@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import cors from 'cors';
 
 import productRoutes from './routes/products.js'
 import ProductModel from './models/ProductModel.js';
@@ -20,6 +21,9 @@ async function startApp() {
   const app = express();
   
   app.use(express.json());
+  app.use(cors({
+    origin: 'http://localhost:8080'
+  }))
   app.use('/products', productRoutes);
   
   try {
