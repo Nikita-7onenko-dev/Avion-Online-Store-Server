@@ -5,7 +5,7 @@ export default function parseMultipartBody(body) {
     let value = body[key];
 
     // Пробуем распарсить JSON, если это массив или объект
-    if (typeof value === 'string' && (value.startsWith('[') || value.startsWith('{'))) {
+    if (typeof value === 'string' && (value.trim().startsWith('[') || value.trim().startsWith('{'))) {
       try {
         value = JSON.parse(value);
       } catch (e) {

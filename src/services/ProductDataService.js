@@ -65,21 +65,32 @@ class ProductDataService{
     }
   }
   
-  async update(product, newFile) {
+  async update(newProductData, id, newFile) {
     try { 
 
+      if( (!newProductData || Object.keys(newProductData).length < 0) && !newFile) {
+        throw new Error('Nothing to update')
+      }
+
       if(newFile) {
-        const oldFilePath = path.resolve('static', path.basename(product.image));
-        fileService.updateFile(oldFilePath, newFile.path)
+        const oldProductData = await ProductModel.findById(id);
+        if(!oldProductData) {
+          throw new Error('Product not found')
+        }
+
+        const oldFilePath = path.resolve('static', path.basename(oldProductData.image));
+        fileService.updateFile(oldFilePath, newFile.path);
+        return oldProductData;
       }
 
-      const updatedProduct = await ProductModel.findByIdAndUpdate(product._id, product, {new: true});
+      if(newProductData && Object.keys(newProductData).length > 0) {
+        const updatedProduct = await ProductModel.findByIdAndUpdate(id, newProductData, {new: true});
 
-      if(!updatedProduct) {
-        throw new Error('Product not found');
+        if(!updatedProduct) {
+          throw new Error('Product not found');
+        }
+        return updatedProduct;
       }
-
-      return updatedProduct;
 
     } catch(err) {
       throw new Error( err instanceof Error ? err.message : String(err));
@@ -102,7 +113,7 @@ class ProductDataService{
       if(!deletedProduct) {
          throw new Error("Product not found");
       }
-     return deletedProduct;
+      return deletedProduct;
 
     } catch(err) {
       throw new Error( err instanceof Error ? err.message : String(err));

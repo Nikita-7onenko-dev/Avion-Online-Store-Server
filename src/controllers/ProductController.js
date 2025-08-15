@@ -6,6 +6,7 @@ class ProductController{
   async create(req, res) {
     try {
       const product = await productDataService.create(req.body, req.file)
+      console.log(product.description)
       res.status(201).json(product)
     } catch(err) {
        if (err instanceof z.ZodError) {
@@ -44,12 +45,13 @@ class ProductController{
 
   async update(req, res) {
     try { 
-      const product = req.body;
+      const newProductData = req.body;
+      const {id} = req.params;
 
-      if(!product._id) {
+      if(!id) {
         return res.status(400).json({message: "Id not specified"});
       }
-      const updatedProduct = await productDataService.update(product, req.file);
+      const updatedProduct = await productDataService.update(newProductData, id, req.file);
       res.json(updatedProduct)
 
     } catch(err) {
