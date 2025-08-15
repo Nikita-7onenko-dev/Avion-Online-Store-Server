@@ -15,6 +15,7 @@ const productSchema = z.object({
   width: z.number().positive(),
   depth: z.number().positive(),
   image: z.string().optional(),
+  public_id: z.string().optional(),
   aspectRatio: z.enum(['4/5', '8/5'])
 })
 

@@ -14,7 +14,8 @@ const productSchema = mongoose.Schema({
   width: {type: Number, required: true},
   depth: {type: Number, required: true},
   image: {type: String, required: true},
-  aspectRatio: {type: String, required: false}
+  public_id: {type: String},
+  aspectRatio: {type: String, required: true}
 }).index(
   {name: 1, designer: 1}, {unique: true}
 );

@@ -10,19 +10,20 @@ import path from "path";
 
 class ProductDataService{
 
-  async create(productData, productImage) {
+  async create(productData, reqFile) {
     try {
 
-      let imagePath = null;
+      let uploadResult = null;
 
-      if(productImage) {
-        imagePath = fileService.saveFile(productImage.path, productImage.originalname)
+      if(reqFile) {
+        uploadResult = await fileService.saveFile(reqFile.buffer);
       }
       const parsedBody = parseMultipartBody(productData)
       const validProduct = validateProduct(parsedBody);
       const product = new ProductModel({
         ...validProduct,
-        image: imagePath
+        image: uploadResult.url,
+        public_id: uploadResult.public_id,
       });
       await product.save();
       return product;
@@ -67,8 +68,9 @@ class ProductDataService{
   
   async update(newProductData, id, newFile) {
     try { 
+      let uploadResult = null;
 
-      if( (!newProductData || Object.keys(newProductData).length < 0) && !newFile) {
+      if( (!newProductData || Object.keys(newProductData).length === 0) && !newFile) {
         throw new Error('Nothing to update')
       }
 
@@ -78,19 +80,20 @@ class ProductDataService{
           throw new Error('Product not found')
         }
 
-        const oldFilePath = path.resolve('static', path.basename(oldProductData.image));
-        fileService.updateFile(oldFilePath, newFile.path);
-        return oldProductData;
-      }
-
-      if(newProductData && Object.keys(newProductData).length > 0) {
-        const updatedProduct = await ProductModel.findByIdAndUpdate(id, newProductData, {new: true});
-
-        if(!updatedProduct) {
-          throw new Error('Product not found');
+        uploadResult = await fileService.updateFile(newFile.buffer, oldProductData.public_id);
+        newProductData = {
+          ...newProductData,
+          image: uploadResult.url,
+          public_id: uploadResult.public_id,
         }
-        return updatedProduct;
       }
+
+      const updatedProduct = await ProductModel.findByIdAndUpdate(id, newProductData, {new: true});
+
+      if(!updatedProduct) {
+        throw new Error('Product not found');
+      }
+      return updatedProduct;
 
     } catch(err) {
       throw new Error( err instanceof Error ? err.message : String(err));
@@ -105,8 +108,7 @@ class ProductDataService{
         throw new Error("Product not found");
       }
       
-      const filePath = path.resolve('static', path.basename(product.image));
-      fileService.deleteFile(filePath);
+      fileService.deleteFile(product.public_id);
 
       const deletedProduct = await ProductModel.findByIdAndDelete(id)
 

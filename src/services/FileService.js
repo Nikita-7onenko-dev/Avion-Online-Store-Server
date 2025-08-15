@@ -1,49 +1,43 @@
 import fs from 'fs';
-import path from 'path';
-import { randomUUID } from "crypto";
+import { v2 as cloudinary } from 'cloudinary';
+import streamFileUpload from '../utils/streamFileUpload.js';
 
 const BASE_URL = process.env.BASE_URL || "http://localhost:5000"
 
 class FileService{
 
-  saveFile(tempPath, originalname) {
-    const ext = path.extname(originalname);
-    const fileName = randomUUID() + ext;
-    const filePath = path.resolve( 'static', fileName );
-
-    if (!fs.existsSync("static")) {
-      fs.mkdirSync("static");
+  async saveFile(buffer) {
+    try {
+      const uploadResult = await streamFileUpload(buffer);
+      return uploadResult;
+    } catch(err) {
+      throw err
     }
-
-    fs.renameSync(tempPath, filePath);
-
-    return `${BASE_URL}/static/${fileName}`;
   }
 
-  updateFile(oldFilePath, newTempPath) {
+  async updateFile(newFileBuffer, oldFilePublicId) {
     try {
-      if(!fs.existsSync(oldFilePath)) {
-        throw new Error(`Old file does not exist: ${oldFilePath}`)
-      }
-      if (!fs.existsSync(newTempPath)) {
-        throw new Error(`New file does not exist: ${newTempPath}`);
-      }
 
-      fs.copyFileSync(newTempPath, oldFilePath);
-      fs.unlinkSync(newTempPath);
+      const destroyRes = await cloudinary.uploader.destroy(oldFilePublicId);
+      console.log('Destroy result:', destroyRes);
+
+      const uploadResult = await streamFileUpload(newFileBuffer);
+      console.log('Upload result:', uploadResult);
+      return uploadResult
+
 
     } catch(err) {
       throw err
     }
   }
 
-  deleteFile(filePath) {
+  async deleteFile(public_id) {
     try {
-      if(!fs.existsSync(filePath)) {
-        throw new Error(`file does not exist: ${filePath}`)
+      if(!public_id) {
+        throw new Error(`public_id does not exist`)
       }
-      fs.unlinkSync(filePath);
-
+      let destroyRes = await cloudinary.uploader.destroy(public_id);
+      console.log('Destroy result:', destroyRes);
     } catch(err) {
       throw err
     }

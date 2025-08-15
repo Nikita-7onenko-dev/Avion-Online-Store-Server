@@ -5,7 +5,7 @@ import ProductController from '../controllers/ProductController.js';
 const router = express.Router();
 
 const upload = multer({
-  dest: 'temp/'
+  storage: multer.memoryStorage()
 })
 
 router.post('/', upload.single('image'),ProductController.create)

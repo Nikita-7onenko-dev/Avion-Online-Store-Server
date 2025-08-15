@@ -6,7 +6,6 @@ class ProductController{
   async create(req, res) {
     try {
       const product = await productDataService.create(req.body, req.file)
-      console.log(product.description)
       res.status(201).json(product)
     } catch(err) {
        if (err instanceof z.ZodError) {
