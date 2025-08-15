@@ -1,4 +1,3 @@
-import fs from 'fs';
 import { v2 as cloudinary } from 'cloudinary';
 import streamFileUpload from '../utils/streamFileUpload.js';
 
