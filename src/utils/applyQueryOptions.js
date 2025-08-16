@@ -2,32 +2,40 @@
 
 export default function applyQueryOptions(query, {search, filters, sorting, alreadyLoaded, limit}) {
 
+  let parsedFilters;
+  try {
+    parsedFilters = filters ? JSON.parse(filters) : null;
+  } catch(err) {
+    parsedFilters = null;
+    console.error("Failed to parse filters: ", err)
+  }
+
   if(search) {
     query = query.find({
        name: { $regex: search, $options: "i" }
     })
   }
 
-  if(filters) {
+  if(parsedFilters) {
 
-    if(filters.productType.length > 0) {
-      query = query.find( {productType: {$in: filters.productType}} )
+    if(parsedFilters.productType.length > 0) {
+      query = query.find( {productType: {$in: parsedFilters.productType}} )
     }
 
-    if(filters.category.length > 0) {
-      query = query.find( {category: {$in: filters.category}} )
+    if(parsedFilters.category.length > 0) {
+      query = query.find( {category: {$in: parsedFilters.category}} )
     }
 
-    if(filters.designers.length > 0) {
-      query = query.find( {designer: {$in: filters.designers}} )
+    if(parsedFilters.designers.length > 0) {
+      query = query.find( {designer: {$in: parsedFilters.designers}} )
     }
 
-    if( filters.priceFilters.length > 0) {
-      const priceQuery = filters.priceFilters.map(range => {
+    if( parsedFilters.priceFilters.length > 0) {
+      const priceQuery = parsedFilters.priceFilters.map(range => {
         if(range === '0 - 100') return  {price: {$gte : 0, $lte: 100}};
         if(range === '101 - 250') return {price: {$gte: 101, $lte: 250}}
         if(range === '250+') return {price: {$gte: 250}};
-      })
+      }).filter(Boolean);
 
       query = query.find( {$or: priceQuery} )
     }
@@ -41,7 +49,7 @@ export default function applyQueryOptions(query, {search, filters, sorting, alre
     if(sorting === 'Best sellers') query = query.sort( {popularityScore: -1} );
   }
 
-  query = query.skip(alreadyLoaded).limit(limit);
+  query = query.skip(Number(alreadyLoaded)).limit(Number(limit));
 
   return query;
 }
