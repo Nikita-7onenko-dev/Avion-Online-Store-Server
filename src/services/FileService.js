@@ -16,9 +16,11 @@ class FileService{
 
   async updateFile(newFileBuffer, oldFilePublicId) {
     try {
-
-      const destroyRes = await cloudinary.uploader.destroy(oldFilePublicId);
-      console.log('Destroy result:', destroyRes);
+      
+      if(oldFilePublicId) {
+        const destroyRes = await cloudinary.uploader.destroy(oldFilePublicId);
+        console.log('Destroy result:', destroyRes);
+      }
 
       const uploadResult = await streamFileUpload(newFileBuffer);
       console.log('Upload result:', uploadResult);

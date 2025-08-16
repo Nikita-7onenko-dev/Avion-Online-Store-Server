@@ -5,8 +5,7 @@ import fileService from './FileService.js';
 
 import parseMultipartBody from '../utils/multipartBodyParser.js'
 
-import {z} from 'zod'
-import path from "path";
+import {z} from 'zod';
 
 class ProductDataService{
 
@@ -18,17 +17,15 @@ class ProductDataService{
 
       const parsedBody = parseMultipartBody(productData)
       const validProduct = validateProduct(parsedBody);
-
+      const productDataToSave = {...validProduct}
       if(reqFile) {
         uploadResult = await fileService.saveFile(reqFile.buffer);
         publicId = uploadResult.public_id;
+        productDataToSave.image = uploadResult.url;
+        productDataToSave.public_id = publicId;
       }
 
-      const product = new ProductModel({
-        ...validProduct,
-        image: uploadResult.url,
-        public_id: publicId,
-      });
+      const product = new ProductModel(productDataToSave);
       await product.save();
       return product;
 

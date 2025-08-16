@@ -54,7 +54,7 @@ class ProductController{
       res.json(updatedProduct)
 
     } catch(err) {
-      res.status( err.message === 'Product not found' ? 404 : 500).json(err.message)
+      res.status( err.message === 'Product not found' ? 404 : 500).json(err.message);
     }
   }
 
