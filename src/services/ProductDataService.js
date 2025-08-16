@@ -14,21 +14,29 @@ class ProductDataService{
     try {
 
       let uploadResult = null;
+      let publicId = null;
+
+      const parsedBody = parseMultipartBody(productData)
+      const validProduct = validateProduct(parsedBody);
 
       if(reqFile) {
         uploadResult = await fileService.saveFile(reqFile.buffer);
+        publicId = uploadResult.public_id;
       }
-      const parsedBody = parseMultipartBody(productData)
-      const validProduct = validateProduct(parsedBody);
+
       const product = new ProductModel({
         ...validProduct,
         image: uploadResult.url,
-        public_id: uploadResult.public_id,
+        public_id: publicId,
       });
       await product.save();
       return product;
 
     } catch (err) {
+      if(publicId) {
+        await fileService.deleteFile(publicId);
+      }
+      
       if(err instanceof z.ZodError) {
         throw err
       } else if( err.code === 11000) {
@@ -108,7 +116,7 @@ class ProductDataService{
         throw new Error("Product not found");
       }
       
-      fileService.deleteFile(product.public_id);
+      await fileService.deleteFile(product.public_id);
 
       const deletedProduct = await ProductModel.findByIdAndDelete(id)
 
