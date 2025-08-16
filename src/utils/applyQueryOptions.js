@@ -49,7 +49,7 @@ export default function applyQueryOptions(query, {search, filters, sorting, alre
     if(sorting === 'Best sellers') query = query.sort( {popularityScore: -1} );
   }
 
-  query = query.skip(Number(alreadyLoaded)).limit(Number(limit));
+  query = query.skip(Number(alreadyLoaded)).limit(Number(limit) + 1);
 
   return query;
 }

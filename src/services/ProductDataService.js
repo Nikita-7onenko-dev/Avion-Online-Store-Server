@@ -51,7 +51,11 @@ class ProductDataService{
     const finalQuery = applyQueryOptions(query, {search, filters, sorting, alreadyLoaded, limit});
     try {
       const products = await finalQuery;
-      return products;
+      const hasMore = products.length > limit;
+      return {
+        hasMore: hasMore,
+        products: products.slice(0, limit)
+      }
     } catch(err) {
       throw new Error( err instanceof Error ? err.message : String(err));
     }
