@@ -1,4 +1,9 @@
 
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+
 
 export default function applyQueryOptions(query, {search, filters, sorting, alreadyLoaded, limit}) {
 
@@ -11,8 +16,10 @@ export default function applyQueryOptions(query, {search, filters, sorting, alre
   }
 
   if(search) {
+    const safeSearch = escapeRegex(search);
+    
     query = query.find({
-       name: { $regex: search, $options: "i" }
+       name: { $regex: safeSearch, $options: "i" }
     })
   }
 
