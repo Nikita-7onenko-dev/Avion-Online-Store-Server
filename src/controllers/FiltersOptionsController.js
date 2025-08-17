@@ -1,4 +1,4 @@
-import FiltersOptionsService from "../services/FiltersOptionsService";
+import FiltersOptionsService from "../services/FiltersOptionsService.js";
 
 
 class FiltersOptionsController{
