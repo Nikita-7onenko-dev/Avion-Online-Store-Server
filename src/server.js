@@ -3,7 +3,8 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import cors from 'cors';
 
-import productRoutes from './routes/products.js'
+import productRoutes from './routes/productsRouter.js';
+import filtersOptionsRoutes from './routes/filtersOptionsRouter.js'
 import ProductModel from './models/ProductModel.js';
 import cloudinaryConfig from './cloudinary.js';
 
@@ -24,8 +25,11 @@ async function startApp() {
   app.use(cors({
     origin: 'http://localhost:8080'
   }))
-  app.use('/products', productRoutes);
   
+  app.use('/products', productRoutes);
+
+  app.use('/filtersOptions', filtersOptionsRoutes); 
+
   try {
     cloudinaryConfig();
     await mongoose.connect(uri);
