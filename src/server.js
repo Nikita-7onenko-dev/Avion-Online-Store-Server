@@ -2,11 +2,26 @@ import express from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
-import productRoutes from './routes/productsRouter.js';
-import filtersOptionsRoutes from './routes/filtersOptionsRouter.js'
+import productRouter from './routes/productsRouter.js';
+import filtersOptionsRouter from './routes/filtersOptionsRouter.js';
+import authRouter from './routes/authRouter.js';
+
 import ProductModel from './models/ProductModel.js';
 import cloudinaryConfig from './cloudinary.js';
+
+
+function devOrigins(origin, callback) {
+    const allowedOrigins = process.env.DEV_ORIGINS.split(',');
+
+      if(!origin) return callback(null, true);
+      if(allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback( new Error('not allowed by CORS'));
+      }
+}
 
 
 async function startApp() {
@@ -15,20 +30,27 @@ async function startApp() {
 
   console.log("Starting server...");
   console.log("PORT:", process.env.PORT);
-
   
-  const uri = `mongodb+srv://AvionDaddy:${process.env.MONGO_PASSWORD}@aviononlinestorecluster.zgbkepg.mongodb.net/?retryWrites=true&w=majority&appName=AvionOnlineStoreCluster`;
+  const uri = `mongodb+srv://${process.env.MONGO_USER_NAME}:${process.env.MONGO_PASSWORD}@aviononlinestorecluster.zgbkepg.mongodb.net/?retryWrites=true&w=majority&appName=AvionOnlineStoreCluster`;
   const PORT = process.env.PORT || 5000;
   const app = express();
   
   app.use(express.json());
-  app.use(cors({
-    origin: 'http://localhost:8080'
-  }))
-  
-  app.use('/products', productRoutes);
+  app.use(cookieParser());
 
-  app.use('/filtersOptions', filtersOptionsRoutes); 
+
+
+  app.use(cors({
+    origin: process.env.IS_DEV === 'true' ? devOrigins : "https://nikita-7onenko-dev.github.io/Avion-Online-Store/",
+    credentials: true,
+  }))
+
+
+
+
+  app.use('/api/products', productRouter);
+  app.use('/api/filtersOptions', filtersOptionsRouter); 
+  app.use('/api/auth', authRouter);
 
   try {
     cloudinaryConfig();
