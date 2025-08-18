@@ -49,7 +49,9 @@ async function startApp() {
 
 
   app.use('/api/products', productRouter);
-  app.use('/api/filtersOptions', filtersOptionsRouter); 
+  app.use('/api/filtersOptions', filtersOptionsRouter);
+  // Keep Alive
+  app.get('/ping', (req, res) => res.status(200).json('pong'));
   // app.use('/api/auth', authRouter);
 
   try {
