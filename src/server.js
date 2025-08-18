@@ -6,7 +6,7 @@ import cookieParser from 'cookie-parser';
 
 import productRouter from './routes/productsRouter.js';
 import filtersOptionsRouter from './routes/filtersOptionsRouter.js';
-import authRouter from './routes/authRouter.js';
+// import authRouter from './routes/authRouter.js';
 
 import ProductModel from './models/ProductModel.js';
 import cloudinaryConfig from './cloudinary.js';
@@ -50,7 +50,7 @@ async function startApp() {
 
   app.use('/api/products', productRouter);
   app.use('/api/filtersOptions', filtersOptionsRouter); 
-  app.use('/api/auth', authRouter);
+  // app.use('/api/auth', authRouter);
 
   try {
     cloudinaryConfig();
