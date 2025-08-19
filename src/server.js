@@ -9,7 +9,7 @@ import filtersOptionsRouter from './routes/filtersOptionsRouter.js';
 // import authRouter from './routes/authRouter.js';
 
 import ProductModel from './models/ProductModel.js';
-import cloudinaryConfig from './cloudinary.js';
+import cloudinaryConfig from './cloudinaryConfig.js';
 
 
 function devOrigins(origin, callback) {
@@ -38,15 +38,10 @@ async function startApp() {
   app.use(express.json());
   app.use(cookieParser());
 
-
-
   app.use(cors({
     origin: process.env.IS_DEV === 'true' ? devOrigins : "https://nikita-7onenko-dev.github.io/Avion-Online-Store/",
     credentials: true,
   }))
-
-
-
 
   app.use('/api/products', productRouter);
   app.use('/api/filtersOptions', filtersOptionsRouter);

@@ -41,7 +41,7 @@ export default function applyQueryOptions(query, {search, filters, sorting, alre
       const priceQuery = parsedFilters.priceFilters.map(range => {
         if(range === '0 - 100') return  {price: {$gte : 0, $lte: 100}};
         if(range === '101 - 250') return {price: {$gte: 101, $lte: 250}}
-        if(range === '250+') return {price: {$gte: 250}};
+        if(range === '251+') return {price: {$gte: 251}};
       }).filter(Boolean);
 
       query = query.find( {$or: priceQuery} )
