@@ -1,9 +1,9 @@
 import express from 'express';
-import FiltersOptionsController from "../controllers/FiltersOptionsController.js";
+import filtersOptionsController from "../controllers/filtersOptionsController.js";
 
 
 const router = express.Router();
 
-router.get('/', FiltersOptionsController.getFiltersFields);
+router.get('/', filtersOptionsController.getFiltersFields);
 
 export default router;

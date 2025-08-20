@@ -24,18 +24,20 @@ export default function cloudinaryConfig() {
   // cloudinary.api.resources(
   //   {
   //     type: 'upload',
-  //     max_results: 10
+  //     max_results: 40
   //   },
   //   (error, result) => {
   //     if (error) {
   //       console.error('Ошибка:', error);
   //       return;
   //     }
-  //     console.log('Файлы в облаке:', result.resources.map(r => ({
+  //     const cloudFiles = result.resources.map(r => ({
   //       public_id: r.public_id,
   //       format: r.format,
   //       url: r.secure_url
-  //     })));
+  //     }))
+  //     console.log('Количество в облаке:', cloudFiles.length);
+  //     console.log('Файлы в облаке:', cloudFiles);
   //   }
   // );
 }

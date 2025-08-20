@@ -1,5 +1,5 @@
 import FiltersOptionsService from "../services/FiltersOptionsService.js";
-
+import handleMongoDBError from "../utils/handleMongoDBError.js";
 
 class FiltersOptionsController{
   
@@ -10,7 +10,7 @@ class FiltersOptionsController{
 
       res.status(200).json(filtersOptionsFields);
     } catch(err) {
-      res.status(500).json({error: err.message})
+      handleMongoDBError(err);
     }
   }
 }

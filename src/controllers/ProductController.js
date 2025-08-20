@@ -1,5 +1,6 @@
-import productDataService from "../services/ProductDataService.js";
-import {z} from 'zod'
+import productDataService from "../services/productDataService.js";
+
+import handleMongoDBError from "../utils/handleMongoDBError.js";
 
 class ProductController{
 
@@ -8,14 +9,7 @@ class ProductController{
       const product = await productDataService.create(req.body, req.file)
       res.status(201).json(product)
     } catch(err) {
-       if (err instanceof z.ZodError) {
-        return res.status(400).json({
-          error: 'Validation error',
-          issues: err.issues
-        });
-      }
-
-      res.status(400).json({error: err.message})
+      handleMongoDBError(err);
     }
   }
 
@@ -24,7 +18,10 @@ class ProductController{
       const data = await productDataService.getAll(req.query);
       res.status(200).json(data)
     } catch(err) {
-      res.status(500).json({error: err.message})
+      if(err instanceof ApiError) {
+        throw err
+      }
+      throw ApiError.serviceUnavailable('Service unavailable: mongoDB');
     }
   }
 
@@ -33,12 +30,12 @@ class ProductController{
       const {id} = req.params;
 
       if(!id) {
-        return res.status(400).json({message: "Id not specified"});
+        throw ApiError.badRequest('Bad request: Id not specified');
       }
       const product = await productDataService.getOne(id);
       res.json(product)
     } catch(err) {
-      res.status( err.message === "Product not found" ? 404 : 500).json(err.message)
+      handleMongoDBError(err);
     }
   }
 
@@ -48,13 +45,13 @@ class ProductController{
       const {id} = req.params;
 
       if(!id) {
-        return res.status(400).json({message: "Id not specified"});
+        throw ApiError.badRequest('Bad request: Id not specified');
       }
       const updatedProduct = await productDataService.update(newProductData, id, req.file);
       res.json(updatedProduct)
 
     } catch(err) {
-      res.status( err.message === 'Product not found' ? 404 : 500).json(err.message);
+      handleMongoDBError(err);
     }
   }
 
@@ -63,14 +60,14 @@ class ProductController{
       const {id} = req.params;
 
       if(!id) {
-        return res.status(400).json({message: "Id not specified"})
+        throw ApiError.badRequest('Bad request: Id not specified');
       }
 
       const deletedProduct = await productDataService.delete(id);
       res.json(deletedProduct);
 
     } catch(err) {
-      res.status(err.message === 'Product not found' ? 404 : 500).json(err.message)
+      handleMongoDBError(err);
     }
   }
 }

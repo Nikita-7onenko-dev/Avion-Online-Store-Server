@@ -1,14 +1,15 @@
-// import { Router } from "express";
+import { Router } from "express";
+import userController from "../controllers/userController.js";
 
-// const router = new Router();
+const router = new Router();
 
-// router.post('/register');
-// router.post('/login');
-// router.post('/logout');
+router.post('/register', userController.register);
+router.post('/login', userController.login);
+router.post('/logout', userController.logout);
 
-// router.get('/activate/:link');
-// router.get('/refresh');
-// router.get('/users/all');
+router.get('/activate/:link', userController.activate);
+router.get('/refresh', userController.refresh);
+router.get('/users/all', userController.getAllUsers);
 
 
-// export default router;
+export default router;

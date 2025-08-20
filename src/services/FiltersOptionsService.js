@@ -1,4 +1,5 @@
-import ProductModel from "../models/ProductModel.js";
+import ProductModel from "../models/productModel.js";
+import handleMongoDBError from "../utils/handleMongoDBError.js";
 
 class FiltersOptionsService{
 
@@ -14,7 +15,7 @@ class FiltersOptionsService{
         return {allProductTypes, allCategories, allDesigners}
 
       } catch(err) {
-        throw new Error(err.message || String(err));
+        handleMongoDBError(err);
       }
   }
 }

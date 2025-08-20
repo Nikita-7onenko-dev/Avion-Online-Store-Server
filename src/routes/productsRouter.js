@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import ProductController from '../controllers/ProductController.js';
+import productController from '../controllers/productController.js';
 
 const router = express.Router();
 
@@ -8,10 +8,10 @@ const upload = multer({
   storage: multer.memoryStorage()
 })
 
-router.post('/', upload.single('image'),ProductController.create)
-router.get('/', ProductController.getAll);
-router.get('/:id', ProductController.getOne);
-router.put('/:id', upload.single('image'), ProductController.update);
-router.delete('/:id', ProductController.delete);
+router.post('/', upload.single('image'), productController.create)
+router.get('/', productController.getAll);
+router.get('/:id', productController.getOne);
+router.put('/:id', upload.single('image'), productController.update);
+router.delete('/:id', productController.delete);
 
 export default router;
