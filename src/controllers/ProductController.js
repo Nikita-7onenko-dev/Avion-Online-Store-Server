@@ -1,4 +1,4 @@
-import productDataService from "../services/productDataService.js";
+import productDataService from "../services/ProductDataService.js";
 
 import handleMongoDBError from "../utils/handleMongoDBError.js";
 
