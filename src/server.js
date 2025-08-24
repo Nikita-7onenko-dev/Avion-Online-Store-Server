@@ -11,7 +11,7 @@ import authRouter from './routes/authRouter.js';
 import productModel from './models/productModel.js';
 import cloudinaryConfig from './cloudinaryConfig.js';
 import errorMiddleware from './middleware/errorMiddleware.js';
-import ApiError from './exceptions/ApiError.js';
+
 
 dotenv.config();
 
