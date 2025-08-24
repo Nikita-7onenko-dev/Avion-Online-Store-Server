@@ -3,19 +3,44 @@ import {z} from 'zod';
 
 import handleMongoDBError from "../utils/handleMongoDBError.js";
 import ApiError from "../exceptions/ApiError.js";
+import validateUserData from "../utils/validateUserData.js";
 
 class UserController{
 
-  async register(req, res, next) {
+  async register(req, res) {
     try{
+      const {email, password, username, ...rest} = validateUserData(req.body);
+      const userData = await userService.register({email, password, username, ...rest});
 
-      const registerUserSchema = z.object({
-        email: z.email({ message: "Invalid email format" }),
-        password: z.string().min(6, { message: "Password must be at least 6 characters" })
-      });
-      const {email, password} = registerUserSchema.parse(req.body);
+      res.cookie(
+        'refreshToken', 
+        userData.refreshToken, 
+        {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true, sameSite: "none"}
+      );
 
-      const userData = await userService.register(email, password);
+      res.status(200).json({...userData.user});
+    } catch(err) {
+      if (err instanceof z.ZodError) {
+        throw ApiError.badRequest("Validation failed", err);
+      }
+      handleMongoDBError(err);
+    }
+  }
+
+  async activate(req, res) {
+    try{
+      const activationLink = req.params.link;
+      await userService.activate(activationLink);
+      return res.redirect(process.env.CLIENT_URL);
+    } catch(err) {
+      handleMongoDBError(err);
+    }
+  }
+
+  async login(req, res) {
+    try{
+      const {email, password} = validateUserData(req.body);
+      const userData = await userService.login(email, password);
 
       res.cookie(
         'refreshToken', 
@@ -24,36 +49,24 @@ class UserController{
       );
 
       res.status(200).json({...userData.user, accessToken: userData.accessToken});
+
     } catch(err) {
       if (err instanceof z.ZodError) {
-        return next(ApiError.badRequest("Validation failed", err.errors));
+        throw ApiError.badRequest("Validation failed", err);
       }
       handleMongoDBError(err);
-
-    }
-  }
-
-  async login(req, res, next) {
-    try{
-
-    } catch(err) {
-      res.status(500).json({error: err.message})
     }
   }
   
-  async logout(req, res, next) {
+  async logout(req, res) {
     try{
-
-    } catch(err) {
-      res.status(500).json({error: err.message})
-    }
-  }
-
-  async activate(req, res, next) {
-    try{
-      const activationLink = req.params.link;
-      await userService.activate(activationLink);
-      return res.redirect(process.env.CLIENT_URL)
+      const {refreshToken} = req.cookies;
+      const token = await userService.logout(refreshToken);
+      res.clearCookie('refreshToken');
+      if(!token) {
+        throw ApiError.badRequest("Bad request: there is no active session")
+      }
+      res.status(200).json('OK');
     } catch(err) {
       handleMongoDBError(err);
     }
@@ -61,9 +74,21 @@ class UserController{
 
   async refresh(req, res, next) {
     try{
+      const {refreshToken} = req.cookies;
 
+      const userData = await userService.refresh(refreshToken);
+
+      res.cookie(
+        'refreshToken', 
+        userData.refreshToken, 
+        {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true, sameSite: "none"}
+      );
+
+      res.status(200).json({...userData.user, accessToken: userData.accessToken});
+
+      
     } catch(err) {
-      res.status(500).json({error: err.message})
+      handleMongoDBError(err);
     }
   }
 
@@ -71,7 +96,7 @@ class UserController{
     try{
 
     } catch(err) {
-      res.status(500).json({error: err.message})
+      handleMongoDBError(err);
     }
   }
 }

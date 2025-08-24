@@ -23,10 +23,46 @@ class TokenService{
         tokenData.refreshToken = refreshToken;
         return tokenData.save();
       }
-
-      const token = tokenModel.create({refreshToken, userId})
+      
+      await tokenModel.create({refreshToken, userId});
     } catch(err) {
       handleMongoDBError(err);
+    }
+  }
+
+  async removeToken(refreshToken) {
+    try{
+      const tokenData = await tokenModel.deleteOne({refreshToken});
+      return tokenData;
+    } catch(err) {
+      handleMongoDBError(err);
+    }
+  }
+
+  async findToken(refreshToken) {
+    try{
+      const tokenData = await tokenModel.findOne({refreshToken});
+      return tokenData;
+    } catch(err) {
+      handleMongoDBError(err);
+    }
+  }
+
+  verifyRefreshToken(token) {
+    try{
+      const userData = jwt.verify(token, process.env.JWT_REFRESH_SECRET)
+      return userData;
+    } catch(err) {
+      return null;
+    }
+  }
+
+  verifyAccessToken(token) {
+    try{
+      const userData = jwt.verify(token, process.env.JWT_ACCESS_SECRET)
+      return userData;
+    } catch(err) {
+      return null;
     }
   }
 }

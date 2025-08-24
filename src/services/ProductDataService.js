@@ -25,7 +25,7 @@ class ProductDataService{
       if(reqFile) {
         uploadResult = await fileService.saveFile(reqFile.buffer);
         publicId = uploadResult.public_id;
-        productDataToSave.image = uploadResult.url;
+        productDataToSave.image = uploadResult.secure_url;
         productDataToSave.public_id = publicId;
       }
 
@@ -99,7 +99,7 @@ class ProductDataService{
         uploadResult = await fileService.updateFile(newFile.buffer, oldProductData.public_id);
         newProductData = {
           ...newProductData,
-          image: uploadResult.url,
+          image: uploadResult.secure_url,
           public_id: uploadResult.public_id,
         }
       }
