@@ -1,7 +1,7 @@
 import ProductModel from "../models/ProductModel.js";
 import validateProduct from "../utils/validateProduct.js";
 import applyQueryOptions from "../utils/applyQueryOptions.js";
-import fileService from './fileService.js';
+import fileService from './FileService.js';
 
 import parseMultipartBody from '../utils/multipartBodyParser.js'
 
