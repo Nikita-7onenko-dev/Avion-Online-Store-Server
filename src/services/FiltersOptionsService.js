@@ -1,4 +1,4 @@
-import productModel from "../models/productModel.js";
+import ProductModel from "../models/ProductModel.js";
 import handleMongoDBError from "../utils/handleMongoDBError.js";
 
 class FiltersOptionsService{
@@ -7,9 +7,9 @@ class FiltersOptionsService{
       try { 
   
         const [allProductTypes, allCategories, allDesigners] = await Promise.all([
-          productModel.distinct('productType'),
-          productModel.distinct('category'),
-          productModel.distinct('designer')
+          ProductModel.distinct('productType'),
+          ProductModel.distinct('category'),
+          ProductModel.distinct('designer')
         ])
   
         return {allProductTypes, allCategories, allDesigners}

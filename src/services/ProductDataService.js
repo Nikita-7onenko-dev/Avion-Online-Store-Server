@@ -1,4 +1,4 @@
-import productModel from "../models/productModel.js";
+import ProductModel from "../models/ProductModel.js";
 import validateProduct from "../utils/validateProduct.js";
 import applyQueryOptions from "../utils/applyQueryOptions.js";
 import fileService from './fileService.js';
@@ -29,7 +29,7 @@ class ProductDataService{
         productDataToSave.public_id = publicId;
       }
 
-      const product = new productModel(productDataToSave);
+      const product = new ProductModel(productDataToSave);
       await product.save();
       return product;
 
@@ -54,7 +54,7 @@ class ProductDataService{
   async getAll(reqQueryParams) {
 
     const {search, filters, sorting, alreadyLoaded, limit} = reqQueryParams;
-    const query = productModel.find();
+    const query = ProductModel.find();
     const finalQuery = applyQueryOptions(query, {search, filters, sorting, alreadyLoaded, limit});
     try {
       const products = await finalQuery;
@@ -70,7 +70,7 @@ class ProductDataService{
   
   async getOne(id) {
     try{ 
-      const product = await productModel.findById(id);
+      const product = await ProductModel.findById(id);
 
       if(!product) {
         throw ApiError.badRequest('Bad request: Product not found');
@@ -91,7 +91,7 @@ class ProductDataService{
       }
 
       if(newFile) {
-        const oldProductData = await productModel.findById(id);
+        const oldProductData = await ProductModel.findById(id);
         if(!oldProductData) {
           throw ApiError.badRequest('Bad request: Product not found');
         }
@@ -104,7 +104,7 @@ class ProductDataService{
         }
       }
 
-      const updatedProduct = await productModel.findByIdAndUpdate(id, newProductData, {new: true});
+      const updatedProduct = await ProductModel.findByIdAndUpdate(id, newProductData, {new: true});
 
       if(!updatedProduct) {
         throw ApiError.badRequest('Bad request: Product not found')
@@ -124,14 +124,14 @@ class ProductDataService{
   async delete(id) {
     try {
 
-      const product = await productModel.findById(id);
+      const product = await ProductModel.findById(id);
       if (!product) {
         throw ApiError.badRequest('Bad request: Product not found');
       }
       
       await fileService.deleteFile(product.public_id);
 
-      const deletedProduct = await productModel.findByIdAndDelete(id)
+      const deletedProduct = await ProductModel.findByIdAndDelete(id)
 
       if(!deletedProduct) {
         throw ApiError.badRequest('Bad request: Product not found');

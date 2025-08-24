@@ -8,7 +8,7 @@ import productRouter from './routes/productsRouter.js';
 import filtersOptionsRouter from './routes/filtersOptionsRouter.js';
 import authRouter from './routes/authRouter.js';
 
-import productModel from './models/productModel.js';
+import ProductModel from './models/ProductModel.js';
 import cloudinaryConfig from './cloudinaryConfig.js';
 import errorMiddleware from './middleware/errorMiddleware.js';
 
@@ -57,7 +57,7 @@ async function startApp() {
   try {
     cloudinaryConfig();
     await mongoose.connect(mongoUri);
-    await productModel.init();
+    await ProductModel.init();
     console.log('MongoDB connected');
     
     app.listen(PORT, () => {
