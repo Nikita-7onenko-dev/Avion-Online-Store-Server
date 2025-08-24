@@ -1,5 +1,5 @@
 import  jwt  from "jsonwebtoken";
-import tokenModel from "../models/tokenModel.js";
+import tokenModel from "../models/TokenModel.js";
 import handleMongoDBError from "../utils/handleMongoDBError.js";
 
 class TokenService{

@@ -1,4 +1,4 @@
-import userModel from "../models/userModel.js";
+import userModel from "../models/UserModel.js";
 import bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 
