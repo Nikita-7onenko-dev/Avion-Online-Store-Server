@@ -25,7 +25,7 @@ class UserService{
 
       const user = await userModel.create({email, password: hashPassword, username, phone, activationLink });
 
-      await mailService.sendActivationToMail(email, `http://localhost:5000/api/activate/${activationLink}`);
+      await mailService.sendActivationToMail(email, `${process.env.API_URL}api/activate/${activationLink}`);
 
       const userDto = new UserDto(user);
 
