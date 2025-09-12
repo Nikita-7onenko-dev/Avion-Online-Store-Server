@@ -84,38 +84,90 @@ class UserService{
     }
   }
 
-    async logout(refreshToken) {
-      try {
-        const result = await tokenService.removeToken(refreshToken);
-        return result;
-      } catch(err) {
-        handleMongoDBError(err)
-      }
+  async logout(refreshToken) {
+    try {
+      const result = await tokenService.removeToken(refreshToken);
+      return result;
+    } catch(err) {
+      handleMongoDBError(err)
     }
+  }
 
-    async refresh(refreshToken) {
-      try{
-        if(!refreshToken) {
-          throw ApiError.unauthorizedError()
-        }
-
-        const userData = tokenService.verifyRefreshToken(refreshToken);
-        const tokenFromDb = await tokenService.findToken(refreshToken);
-        if(!userData || !tokenFromDb) {
-          throw ApiError.unauthorizedError()
-        }
-        const user = await userModel.findById(userData._id)
-
-        const userDto = new UserDto(user);
-        
-        const tokens = tokenService.generateTokens({...userDto});
-        await tokenService.saveToken(userDto._id, tokens.refreshToken)
-
-        return {...tokens, user: userDto}
-      } catch(err) {
-        handleMongoDBError(err);
+  async refresh(refreshToken) {
+    try{
+      if(!refreshToken) {
+        throw ApiError.unauthorizedError()
       }
+
+      const userData = tokenService.verifyRefreshToken(refreshToken);
+      const tokenFromDb = await tokenService.findToken(refreshToken);
+      if(!userData || !tokenFromDb) {
+        throw ApiError.unauthorizedError()
+      }
+      const user = await userModel.findById(userData._id)
+
+      const userDto = new UserDto(user);
+      
+      const tokens = tokenService.generateTokens({...userDto});
+      await tokenService.saveToken(userDto._id, tokens.refreshToken)
+
+      return {...tokens, user: userDto}
+    } catch(err) {
+      handleMongoDBError(err);
     }
+  }
+
+  async updateUserData(userData) {
+    try {
+       const {
+        _id,
+        email, 
+        oldPassword, 
+        newPassword,
+        ...otherFields
+      } = userData;
+
+      const user = await userModel.findById(_id);
+      if(!user) {
+        throw ApiError.unauthorizedError();
+      }
+    
+      const updateData = Object.fromEntries(
+        Object.entries(otherFields).filter(([k, v]) => {
+          if(k === 'password' || k === 'confirmPassword' || k === 'oldPassword') {
+            return v;
+          } else return true  
+        })
+      );
+
+      if(user.email !== email) {
+        const activationLink = randomBytes(16).toString('hex');
+        await mailService.sendActivationToMail(email, `${process.env.API_URL}api/activate/${activationLink}`);
+        updateData.isActivated = false;
+        updateData.activationLink = activationLink;
+      }
+
+      if (newPassword && newPassword.trim() !== "") {
+        const isEqualPassword = await bcrypt.compare(oldPassword, user.password);
+        if(!isEqualPassword) {
+          throw ApiError.unauthorizedError();
+        }
+        updateData.password = await bcrypt.hash(newPassword, 4);
+      }
+
+      const newUserData = await userModel.findOneAndUpdate(
+        {email: email}, 
+        {$set: updateData }, 
+        {new: true}
+      );
+
+      const userDto = new UserDto(newUserData);
+      return userDto
+
+    } catch(err) {
+      handleMongoDBError(err)
+    }
+  }
 
   
 }

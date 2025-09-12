@@ -8,6 +8,11 @@ export default class UserDto{
   isActivated;
   role;
   phone;
+  firstName;
+  lastName;
+  country;
+  city;
+
 
   constructor(userModel) {
     this.email = userModel.email;
@@ -16,6 +21,10 @@ export default class UserDto{
     this.isActivated = userModel.isActivated;
     this.role = userModel.role;
     this.phone = userModel.phone;
+    this.firstName = userModel.firstName;
+    this.lastName = userModel.lastName;
+    this.country = userModel.country;
+    this.city = userModel.city;
   }
 
 }

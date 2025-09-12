@@ -4,6 +4,7 @@ import {z} from 'zod';
 import handleMongoDBError from "../utils/handleMongoDBError.js";
 import ApiError from "../exceptions/ApiError.js";
 import validateUserData from "../utils/validateUserData.js";
+import tokenService from "../services/tokenService.js";
 
 class UserController{
 
@@ -18,7 +19,7 @@ class UserController{
         {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true, sameSite: "none"}
       );
 
-      res.status(200).json({...userData.user});
+      res.status(201).json({...userData.user});
     } catch(err) {
       if (err instanceof z.ZodError) {
         throw ApiError.badRequest("Validation failed", err);
@@ -72,7 +73,7 @@ class UserController{
     }
   }
 
-  async refresh(req, res, next) {
+  async refresh(req, res) {
     try{
       const {refreshToken} = req.cookies;
 
@@ -91,6 +92,25 @@ class UserController{
       handleMongoDBError(err);
     }
   }
+
+  async updateUserData(req, res) {
+    try {
+
+      const {email, password, username, accessToken, ...rest} = validateUserData(req.body);
+
+      const userData = await userService.updateUserData({email, password, username, ...rest});
+
+      userData.accessToken = accessToken;
+
+      res.status(200).json({...userData})
+
+    } catch(err) {
+       if (err instanceof z.ZodError) {
+        throw ApiError.badRequest("Validation failed", err);
+      }
+      handleMongoDBError(err);
+    }
+  } 
 
   async getAllUsers(req, res, next) {
     try{
