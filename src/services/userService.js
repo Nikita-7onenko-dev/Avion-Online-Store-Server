@@ -141,8 +141,10 @@ class UserService{
       );
 
       if(user.email !== email) {
+        console.log(email)
         const activationLink = randomBytes(16).toString('hex');
         await mailService.sendActivationToMail(email, `${process.env.API_URL}api/activate/${activationLink}`);
+        updateData.email = email;
         updateData.isActivated = false;
         updateData.activationLink = activationLink;
       }
@@ -156,7 +158,7 @@ class UserService{
       }
 
       const newUserData = await userModel.findOneAndUpdate(
-        {email: email}, 
+        {email: user.email}, 
         {$set: updateData }, 
         {new: true}
       );
