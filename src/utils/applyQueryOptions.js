@@ -25,7 +25,7 @@ export default function applyQueryOptions(query, {search, filters, sorting, alre
 
   if(parsedFilters) {
 
-    if(parsedFilters.productType.length > 0) {
+    if(parsedFilters.productTypes.length > 0) {
       query = query.find( {productType: {$in: parsedFilters.productType}} )
     }
 

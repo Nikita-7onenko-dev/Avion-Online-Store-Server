@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import productRouter from './routes/productsRouter.js';
 import filtersOptionsRouter from './routes/filtersOptionsRouter.js';
 import authRouter from './routes/authRouter.js';
+// import ordersRouter from './routes/ordersRouter.js';
 
 import ProductModel from './models/ProductModel.js';
 import cloudinaryConfig from './cloudinaryConfig.js';
@@ -42,6 +43,9 @@ function devOrigins(origin, callback) {
   app.use('/api/filtersOptions', filtersOptionsRouter);
 
   app.use('/api', authRouter);
+
+  // app.use('api/orders', ordersRouter);
+  
   // Keep Alive
   app.get('/ping', (req, res) => res.status(200).json('pong'));
   app.use(errorMiddleware)
