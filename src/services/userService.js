@@ -123,7 +123,8 @@ class UserService{
         _id,
         email, 
         oldPassword, 
-        newPassword,
+        password: newPassword,
+        confirmPassword,
         ...otherFields
       } = userData;
 
@@ -132,13 +133,19 @@ class UserService{
         throw ApiError.unauthorizedError();
       }
     
-      const updateData = Object.fromEntries(
-        Object.entries(otherFields).filter(([k, v]) => {
-          if(k === 'password' || k === 'confirmPassword' || k === 'oldPassword') {
-            return v;
-          } else return true  
-        })
-      );
+      const updateData = { ...otherFields }
+
+      if (newPassword !== confirmPassword) {
+        throw ApiError.badRequest('Passwords do not match');
+      }
+
+      if(newPassword && newPassword.trim() !== "") {
+        const isEqualPassword = await bcrypt.compare(oldPassword, user.password);
+        if(!isEqualPassword) {
+          throw ApiError.unauthorizedError('Wrong password');
+        }
+        updateData.password = await bcrypt.hash(newPassword, 4);
+      }
 
       if(user.email !== email) {
         console.log(email)
@@ -149,16 +156,8 @@ class UserService{
         updateData.activationLink = activationLink;
       }
 
-      if (newPassword && newPassword.trim() !== "") {
-        const isEqualPassword = await bcrypt.compare(oldPassword, user.password);
-        if(!isEqualPassword) {
-          throw ApiError.unauthorizedError();
-        }
-        updateData.password = await bcrypt.hash(newPassword, 4);
-      }
-
       const newUserData = await userModel.findOneAndUpdate(
-        {email: user.email}, 
+        {_id: user._id}, 
         {$set: updateData }, 
         {new: true}
       );
