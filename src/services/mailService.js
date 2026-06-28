@@ -1,49 +1,53 @@
-import nodemailer from 'nodemailer';
-import ApiError from '../exceptions/ApiError.js';
+import { Resend } from "resend";
+import ApiError from "../exceptions/ApiError.js";
 
-class MailService{
-
+class MailService {
   constructor() {
-    this.transporter = null;
+    this.resend = null;
   }
 
   _init() {
-    if(this.transporter) return;
-    if (!process.env.SMTP_USER || !process.env.SMTP_PASSWORD) {
-      throw ApiError.internal('MailService initialization error: user or password is not defined')
+    if (this.resend) return;
+
+    if (!process.env.RESEND_API_KEY) {
+      throw ApiError.internal(
+        "MailService initialization error: RESEND_API_KEY is not defined"
+      );
     }
-    this.transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASSWORD,
-      }
-    })
+
+    this.resend = new Resend(process.env.RESEND_API_KEY);
   }
 
   async sendActivationToMail(to, link) {
+    this._init();
 
-    this._init()
     try {
-      await this.transporter.sendMail({
-        from: process.env.SMTP_USER,
+      const { data, error } = await this.resend.emails.send({
+        from: "Avion Mail Service <onboarding@resend.dev>",
         to,
         subject: "Account activation on Avion",
-        text: "",
+        text: `To activate your account, follow this link: ${link}`,
         html: `
-              <div>
-                <h1>To activate your account, follow the link</h1>
-                <a href="${link}">${link}</a>
-              </div>
-              `
-      }) 
-    } catch(err) {
-      if(err instanceof ApiError) {
+          <div>
+            <h1>To activate your account, follow the link</h1>
+            <a href="${link}">${link}</a>
+          </div>
+        `,
+      });
+
+      if (error) {
+        console.error("RESEND ERROR:", error);
+        throw ApiError.serviceUnavailable("Email service unavailable");
+      }
+
+      console.log("RESEND RESPONSE:", data);
+    } catch (err) {
+      if (err instanceof ApiError) {
         throw err;
       }
-      throw ApiError.serviceUnavailable('Service unavailable: smtp.gmail.com')
+
+      console.error("RESEND ERROR:", err);
+      throw ApiError.serviceUnavailable("Email service unavailable");
     }
   }
 }

@@ -81,6 +81,33 @@ class ProductDataService{
       handleMongoDBError(err);
     }
   }
+
+  async getBatchByIds(ids) {
+    try {
+
+      const products = await ProductModel.find({ 
+        _id: {
+          $in: ids
+        }
+      })
+
+      if(!products) {
+        throw ApiError.badRequest('Bad request: Products not found');
+      }
+
+      const idsMap = new Map();
+
+      products.forEach(product => {
+        idsMap.set(product._id.toString(), product);
+      })
+
+      const sortedProducts = ids.map(id => (idsMap.get(id)));
+      return sortedProducts;
+
+    } catch(err) {
+      handleMongoDBError(err);
+    }
+  }
   
   async update(newProductData, id, newFile) {
     try { 

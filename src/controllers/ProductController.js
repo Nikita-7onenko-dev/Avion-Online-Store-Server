@@ -1,3 +1,4 @@
+import ApiError from "../exceptions/ApiError.js";
 import productDataService from "../services/ProductDataService.js";
 
 import handleMongoDBError from "../utils/handleMongoDBError.js";
@@ -18,10 +19,24 @@ class ProductController{
       const data = await productDataService.getAll(req.query);
       res.status(200).json(data)
     } catch(err) {
-      if(err instanceof ApiError) {
-        throw err
+      handleMongoDBError(err);
+    }
+  }
+
+  async getBatch(req, res) {
+
+    try {
+      const idsArray = req.query.ids.split(",");
+
+      if(!idsArray) {
+        throw ApiError.badRequest('Bad request: Ids not specified');
       }
-      throw ApiError.serviceUnavailable('Service unavailable: mongoDB');
+
+      const data = await productDataService.getBatchByIds(idsArray);
+
+      res.status(200).json(data);
+    } catch(err) {
+      handleMongoDBError(err);
     }
   }
 
